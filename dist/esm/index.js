@@ -39,6 +39,7 @@ function getRoutes(routes, root = "/") {
 }
 function CanActivateRoute({ abpath, route, info, }) {
     var _a, _b;
+    var _c;
     const hasCanActivate = !!((_a = route.canActivate) === null || _a === void 0 ? void 0 : _a.length);
     const [isActivate, setActivate] = useState(!hasCanActivate);
     function runGuards(guards = []) {
@@ -64,7 +65,7 @@ function CanActivateRoute({ abpath, route, info, }) {
             res(false);
         }));
     }
-    Object.assign((_b = info.location.state) !== null && _b !== void 0 ? _b : {}, route.data);
+    Object.assign((_b = (_c = info.location).state) !== null && _b !== void 0 ? _b : (_c.state = {}), route.data);
     useEffect(() => {
         var _a;
         var _b;

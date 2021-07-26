@@ -224,7 +224,7 @@ function CanActivateRoute({
     });
   }
 
-  Object.assign(info.location.state ?? {}, route.data);
+  Object.assign(info.location.state ??= {}, route.data);
 
   useEffect(() => {
     (info.location as any).from ??= "";

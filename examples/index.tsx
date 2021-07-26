@@ -45,7 +45,7 @@ const Dash = (props: any) => {
 const LzComponent = React.lazy(() => import("./lzpage"));
 
 const Homea = () => {
-  return <div> {(useLocation().state as any).name}</div>;
+  return <div> {JSON.stringify(useLocation().state as any)}</div>;
 };
 
 const routes: Routes = [
@@ -73,7 +73,7 @@ const routes: Routes = [
           <h1>
             Home
             <p>
-              <Link2 to={{ pathname: "a", state: { a: "b" } }}>to home/a</Link2>
+              <Link2 to={{ pathname: "a" }}>to home/a</Link2>
             </p>
             <p>
               <Link2 to="b">to home/b</Link2>
