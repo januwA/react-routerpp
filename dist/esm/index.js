@@ -42,7 +42,7 @@ function getRoutes(routes, root = "/") {
         const abpath = path.join(root, route.path);
         return (_jsx(Route, { exact: route.exact, path: abpath, strict: route.strict, location: route.location, sensitive: route.sensitive, render: (rinfo) => {
                 if (route.redirectTo) {
-                    route.component = (_jsx(Redirect, { to: path.isAbsolute(route.redirectTo)
+                    route.component = () => (_jsx(Redirect, { to: path.isAbsolute(route.redirectTo)
                             ? route.redirectTo
                             : path.join(root, route.redirectTo) }, void 0));
                     return (_jsx(CanActivateRoute, { abpath: abpath, route: route, info: rinfo }, void 0));
@@ -111,7 +111,8 @@ function CanActivateRoute({ abpath, route, info, }) {
             });
         };
     }, []);
-    return (_jsx(_Fragment, { children: isActivate ? (((_c = route.children) === null || _c === void 0 ? void 0 : _c.length) ? (_jsx(Switch, { children: getRoutes(route.children, abpath) }, void 0)) : (route.component)) : null }, void 0));
+    const Comp = route.component;
+    return (_jsx(_Fragment, { children: isActivate ? (((_c = route.children) === null || _c === void 0 ? void 0 : _c.length) ? (_jsx(Switch, { children: getRoutes(route.children, abpath) }, void 0)) : Comp ? (_jsx(Comp, {}, void 0)) : null) : null }, void 0));
 }
 export function Link2(props) {
     const isStr = typeof props.to === "string";

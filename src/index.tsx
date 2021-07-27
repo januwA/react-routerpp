@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { ComponentClass, FunctionComponent, useEffect } from "react";
 import { useState } from "react";
 import {
   Link,
@@ -38,7 +38,7 @@ export interface IRoute {
    *
    * ! 当同时拥有component和children时，component无效
    */
-  component?: React.ReactNode;
+  component?: FunctionComponent<any> | ComponentClass<any>;
 
   /**
    * 当路径匹配时重定向到的 URL
@@ -179,10 +179,10 @@ function getRoutes(routes: Routes, root = "/"): React.ReactNode[] {
         sensitive={route.sensitive}
         render={(rinfo) => {
           if (route.redirectTo) {
-            route.component = (
+            route.component = () => (
               <Redirect
                 to={
-                  path.isAbsolute(route.redirectTo)
+                  path.isAbsolute(route.redirectTo!)
                     ? (route.redirectTo as string)
                     : path.join(root, route.redirectTo)
                 }
@@ -266,14 +266,15 @@ function CanActivateRoute({
     };
   }, []);
 
+  const Comp = route.component!;
   return (
     <>
       {isActivate ? (
         route.children?.length ? (
           <Switch>{getRoutes(route.children, abpath)}</Switch>
-        ) : (
-          route.component
-        )
+        ) : Comp ? (
+          <Comp />
+        ) : null
       ) : null}
     </>
   );
@@ -306,7 +307,7 @@ export function Link2<S = unknown>(
 export function Routing({ routes, root }: { routes: Routes; root?: string }) {
   const match = useRouteMatch();
   root ??= match.path;
-  
+
   const history = useHistory();
   const location = useLocation();
   useEffect(() => {

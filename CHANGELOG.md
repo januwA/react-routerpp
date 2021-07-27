@@ -1,3 +1,7 @@
+## 0.3.0 [2021-7-27]
+
+- No longer use static components
+
 ## 0.2.0 [2021-7-27]
 
 - Get root from match

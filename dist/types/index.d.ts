@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ComponentClass, FunctionComponent } from "react";
 import { LinkProps, RouteComponentProps } from "react-router-dom";
 export declare type Data = {
     [name: string]: any;
@@ -9,7 +9,7 @@ export declare type Guard = (props: RouteComponentProps<{
 export interface IRoute {
     path?: string;
     exact?: boolean;
-    component?: React.ReactNode;
+    component?: FunctionComponent<any> | ComponentClass<any>;
     redirectTo?: string;
     canActivate?: Guard[];
     CanActivateChild?: Guard[];

@@ -3,49 +3,50 @@ import ReactDOM from "react-dom";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { Routing, Routes, Link2 } from "../src/";
 
-const dashRoutes: Routes = [
-  {
-    path: "x",
-    component: <p>x</p>,
-  },
-  {
-    path: "y",
-    canDeactivate: [
-      function exitGuard() {
-        return window.confirm("exitGuard");
-      },
-    ],
-    component: (
-      <p>
-        <input type="text" />
-      </p>
-    ),
-  },
-];
+const LzPage = React.lazy(() => import("./lzpage"));
 
-const Dash = (props: any) => {
+const LzComponent = () => {
   return (
-    <>
-      <h1>dashboard</h1>
-      <ul>
-        <li>
-          <Link2 to="./x">to x</Link2>
-        </li>
-        <li>
-          <Link2 to="./y">to y</Link2>
-        </li>
-      </ul>
-
-      <Routing routes={dashRoutes} />
-    </>
+    <Suspense fallback={<div>Loading...</div>}>
+      <LzPage></LzPage>
+    </Suspense>
   );
 };
-
-const LzComponent = React.lazy(() => import("./lzpage"));
 
 const Homea = () => {
   return <div> {JSON.stringify(useLocation().state as any)}</div>;
 };
+
+const Home = () => {
+  return (
+    <h1>
+      Home
+      <p>
+        <Link2 to={{ pathname: "a" }}>to home/a</Link2>
+      </p>
+      <p>
+        <Link2 to="b">to home/b</Link2>
+      </p>
+    </h1>
+  );
+};
+
+const Login = () => {
+  return (
+    <h1>
+      Login
+      <p>
+        <Link2 to={"/home"}>To Home</Link2>
+      </p>
+    </h1>
+  );
+};
+
+class NotFound extends React.Component {
+  render() {
+    return <h1 style={{ color: "red" }}>404</h1>;
+  }
+}
 
 const routes: Routes = [
   {
@@ -68,58 +69,26 @@ const routes: Routes = [
       {
         path: "",
         exact: true,
-        component: (
-          <h1>
-            Home
-            <p>
-              <Link2 to={{ pathname: "a" }}>to home/a</Link2>
-            </p>
-            <p>
-              <Link2 to="b">to home/b</Link2>
-            </p>
-            <p>
-              <Link2 to="/dash">to dath</Link2>
-            </p>
-          </h1>
-        ),
+        component: Home,
       },
       {
         path: "a",
         data: { name: "home-a" },
-        component: <Homea></Homea>,
+        component: Homea,
       },
       {
         path: "b",
-        component: (
-          <Suspense fallback={<div>Loading...</div>}>
-            <LzComponent />
-          </Suspense>
-        ),
-      },
-      {
-        path: "*",
-        component: <h1>home 404</h1>,
+        component: LzComponent,
       },
     ],
   },
   {
-    path: "dash",
-    component: <Dash />,
-  },
-  {
     path: "login",
-    component: (
-      <h1>
-        Login
-        <p>
-          <Link2 to={"/home"}>To Home</Link2>
-        </p>
-      </h1>
-    ),
+    component: Login,
   },
   {
     path: "*",
-    component: <h1 style={{ color: "red" }}>404</h1>,
+    component: NotFound,
   },
 ];
 
