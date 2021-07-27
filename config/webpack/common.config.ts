@@ -44,9 +44,6 @@ const commonConfig: webpack.Configuration = {
 
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
-    alias: {
-      path: "path-browserify",
-    },
   },
   plugins: [new CleanWebpackPlugin()],
 };

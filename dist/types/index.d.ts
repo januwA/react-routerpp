@@ -25,7 +25,7 @@ export interface IRoute {
 }
 export declare type Routes = IRoute[];
 export declare function Link2<S = unknown>(props: LinkProps<S> & React.RefAttributes<HTMLAnchorElement>): JSX.Element;
-export declare function Routing({ routes, root, }: {
+export declare function Routing({ routes, root }: {
     routes: Routes;
     root?: string;
 }): JSX.Element;

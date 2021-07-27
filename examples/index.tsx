@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter, useLocation, useRouteMatch } from "react-router-dom";
+import { BrowserRouter, useLocation } from "react-router-dom";
 import { Routing, Routes, Link2 } from "../src/";
 
 const dashRoutes: Routes = [
@@ -24,20 +24,19 @@ const dashRoutes: Routes = [
 ];
 
 const Dash = (props: any) => {
-  const match = useRouteMatch();
   return (
     <>
       <h1>dashboard</h1>
       <ul>
         <li>
-          <Link2 to={`./x`}>to x</Link2>
+          <Link2 to="./x">to x</Link2>
         </li>
         <li>
-          <Link2 to={`${match.path}/y`}>to y</Link2>
+          <Link2 to="./y">to y</Link2>
         </li>
       </ul>
 
-      <Routing routes={dashRoutes} root={match.path} />
+      <Routing routes={dashRoutes} />
     </>
   );
 };

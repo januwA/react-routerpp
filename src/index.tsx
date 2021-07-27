@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import * as path from "path";
 import {
   Link,
   LinkProps,
@@ -71,11 +70,11 @@ export interface IRoute {
   canDeactivate?: Guard[];
 
   /**
+   *  ! 未实现
+   *
    * 处理程序，以确定是否允许当前用户加载组件
    *
    * 默认情况下，任何用户都可以加载
-   *
-   *  ! 未实现
    */
   canLoad?: any[];
 
@@ -94,9 +93,9 @@ export interface IRoute {
   children?: Routes;
 
   /**
-   * 指定延迟加载的子路由的对象
+   * ! 未实现
    *
-   * ! 为实现
+   * 指定延迟加载的子路由的对象
    *
    * 使用react的方法懒加载
    *
@@ -108,6 +107,8 @@ export interface IRoute {
   loadChildren?: () => Promise<React.ReactNode>;
 
   /**
+   * ! 未实现
+   *
    * 定义何时运行守卫和解析器
    *
    * - `paramsOrQueryParamsChange`：当查询参数改变时运行
@@ -115,7 +116,6 @@ export interface IRoute {
    *
    * 默认情况下，只有当路由的矩阵参数发生变化时，守卫和解析器才会运行
    *
-   * ! 为实现
    */
   runGuardsAndResolvers?: any;
 
@@ -140,20 +140,36 @@ export interface IRoute {
 
 export type Routes = IRoute[];
 
-const pathJoin = (...paths: (string | undefined)[]) => {
-  return paths
-    .filter((p) => p)
-    .join("/")
-    .replace(/\/+/, "/");
+const path = {
+  join(...paths: (string | undefined)[]) {
+    return paths
+      .filter((p) => p)
+      .join("/")
+      .replace(/\/+/, "/");
+  },
+  isAbsolute(p: string) {
+    return p.trimStart().startsWith("/");
+  },
+  resolve(...paths: string[]) {
+    const cpath = paths.join("/");
+    const isABpath = cpath.trimStart().startsWith("/");
+    const rpaths = cpath
+      .split(/\/+/)
+      .filter((it) => it)
+      .reduce<string[]>((acc, it) => {
+        if (it === "..") return acc.pop(), acc;
+        if (it === ".") return acc;
+        return acc.push(it), acc;
+      }, []);
+
+    return (isABpath ? "/" : "") + rpaths.join("/");
+  },
 };
 
-function getRoutes(routes: Routes, root = "/"): Route[] {
-  const anyRoutes: any[] = [];
-
-  for (const route of routes) {
-    const abpath = pathJoin(root, route.path);
-
-    anyRoutes.push(
+function getRoutes(routes: Routes, root = "/"): React.ReactNode[] {
+  return routes.map((route) => {
+    const abpath = path.join(root, route.path);
+    return (
       <Route
         key={abpath}
         exact={route.exact}
@@ -161,25 +177,25 @@ function getRoutes(routes: Routes, root = "/"): Route[] {
         strict={route.strict}
         location={route.location}
         sensitive={route.sensitive}
-        render={(info) => {
+        render={(rinfo) => {
           if (route.redirectTo) {
             route.component = (
               <Redirect
                 to={
-                  route.redirectTo![0] === "/"
+                  path.isAbsolute(route.redirectTo)
                     ? (route.redirectTo as string)
-                    : pathJoin(root, route.redirectTo)
+                    : path.join(root, route.redirectTo)
                 }
               />
             );
             return (
-              <CanActivateRoute abpath={abpath} route={route} info={info} />
+              <CanActivateRoute abpath={abpath} route={route} info={rinfo} />
             );
           }
 
           if (route.component || route.children) {
             return (
-              <CanActivateRoute abpath={abpath} route={route} info={info} />
+              <CanActivateRoute abpath={abpath} route={route} info={rinfo} />
             );
           }
 
@@ -187,9 +203,7 @@ function getRoutes(routes: Routes, root = "/"): Route[] {
         }}
       />
     );
-  }
-
-  return anyRoutes;
+  });
 }
 
 function CanActivateRoute({
@@ -206,7 +220,7 @@ function CanActivateRoute({
   const hasCanActivate = !!route.canActivate?.length;
   const [isActivate, setActivate] = useState(!hasCanActivate);
 
-  function runGuards(guards: Guard[] = []): Promise<boolean | string> {
+  const runGuards = (guards: Guard[] = []): Promise<boolean | string> => {
     return new Promise<boolean | string>(async (res) => {
       if (!guards.length) return res(true);
       let r = guards[0](info);
@@ -219,12 +233,12 @@ function CanActivateRoute({
         if (r === false) res(false);
         if (typeof r === "string") res(r);
       }
-
       res(false);
     });
-  }
+  };
 
-  Object.assign(info.location.state ??= {}, route.data);
+  // route.data inject to location.state
+  Object.assign((info.location.state ??= {}), route.data);
 
   useEffect(() => {
     (info.location as any).from ??= "";
@@ -255,7 +269,7 @@ function CanActivateRoute({
   return (
     <>
       {isActivate ? (
-        route.children && route.children.length ? (
+        route.children?.length ? (
           <Switch>{getRoutes(route.children, abpath)}</Switch>
         ) : (
           route.component
@@ -265,6 +279,9 @@ function CanActivateRoute({
   );
 }
 
+/**
+ * Strengthen the `Link` component and support relative routing
+ */
 export function Link2<S = unknown>(
   props: LinkProps<S> & React.RefAttributes<HTMLAnchorElement>
 ) {
@@ -286,13 +303,10 @@ export function Link2<S = unknown>(
   );
 }
 
-export function Routing({
-  routes,
-  root = "/",
-}: {
-  routes: Routes;
-  root?: string;
-}) {
+export function Routing({ routes, root }: { routes: Routes; root?: string }) {
+  const match = useRouteMatch();
+  root ??= match.path;
+  
   const history = useHistory();
   const location = useLocation();
   useEffect(() => {

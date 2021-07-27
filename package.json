@@ -1,6 +1,6 @@
 {
   "name": "react-routerpp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Similar to angular routing configuration, but not very similar",
   "private": false,
   "main": "./dist/umd/react-routerpp.js",
@@ -48,7 +48,5 @@
     "webpack-dev-server": "^3.11.2",
     "webpack-merge": "^5.8.0"
   },
-  "dependencies": {
-    "path-browserify": "^1.0.1"
-  }
+  "dependencies": {}
 }

@@ -10,39 +10,56 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
 import { useEffect } from "react";
 import { useState } from "react";
-import * as path from "path";
 import { Link, Redirect, Route, Switch, useHistory, useLocation, useRouteMatch, } from "react-router-dom";
-const pathJoin = (...paths) => {
-    return paths
-        .filter((p) => p)
-        .join("/")
-        .replace(/\/+/, "/");
+const path = {
+    join(...paths) {
+        return paths
+            .filter((p) => p)
+            .join("/")
+            .replace(/\/+/, "/");
+    },
+    isAbsolute(p) {
+        return p.trimStart().startsWith("/");
+    },
+    resolve(...paths) {
+        const cpath = paths.join("/");
+        const isABpath = cpath.trimStart().startsWith("/");
+        const rpaths = cpath
+            .split(/\/+/)
+            .filter((it) => it)
+            .reduce((acc, it) => {
+            if (it === "..")
+                return acc.pop(), acc;
+            if (it === ".")
+                return acc;
+            return acc.push(it), acc;
+        }, []);
+        return (isABpath ? "/" : "") + rpaths.join("/");
+    },
 };
 function getRoutes(routes, root = "/") {
-    const anyRoutes = [];
-    for (const route of routes) {
-        const abpath = pathJoin(root, route.path);
-        anyRoutes.push(_jsx(Route, { exact: route.exact, path: abpath, strict: route.strict, location: route.location, sensitive: route.sensitive, render: (info) => {
+    return routes.map((route) => {
+        const abpath = path.join(root, route.path);
+        return (_jsx(Route, { exact: route.exact, path: abpath, strict: route.strict, location: route.location, sensitive: route.sensitive, render: (rinfo) => {
                 if (route.redirectTo) {
-                    route.component = (_jsx(Redirect, { to: route.redirectTo[0] === "/"
+                    route.component = (_jsx(Redirect, { to: path.isAbsolute(route.redirectTo)
                             ? route.redirectTo
-                            : pathJoin(root, route.redirectTo) }, void 0));
-                    return (_jsx(CanActivateRoute, { abpath: abpath, route: route, info: info }, void 0));
+                            : path.join(root, route.redirectTo) }, void 0));
+                    return (_jsx(CanActivateRoute, { abpath: abpath, route: route, info: rinfo }, void 0));
                 }
                 if (route.component || route.children) {
-                    return (_jsx(CanActivateRoute, { abpath: abpath, route: route, info: info }, void 0));
+                    return (_jsx(CanActivateRoute, { abpath: abpath, route: route, info: rinfo }, void 0));
                 }
                 return null;
             } }, abpath));
-    }
-    return anyRoutes;
+    });
 }
 function CanActivateRoute({ abpath, route, info, }) {
-    var _a, _b;
-    var _c;
+    var _a, _b, _c;
+    var _d;
     const hasCanActivate = !!((_a = route.canActivate) === null || _a === void 0 ? void 0 : _a.length);
     const [isActivate, setActivate] = useState(!hasCanActivate);
-    function runGuards(guards = []) {
+    const runGuards = (guards = []) => {
         return new Promise((res) => __awaiter(this, void 0, void 0, function* () {
             if (!guards.length)
                 return res(true);
@@ -64,8 +81,8 @@ function CanActivateRoute({ abpath, route, info, }) {
             }
             res(false);
         }));
-    }
-    Object.assign((_b = (_c = info.location).state) !== null && _b !== void 0 ? _b : (_c.state = {}), route.data);
+    };
+    Object.assign(((_b = (_d = info.location).state) !== null && _b !== void 0 ? _b : (_d.state = {})), route.data);
     useEffect(() => {
         var _a;
         var _b;
@@ -94,7 +111,7 @@ function CanActivateRoute({ abpath, route, info, }) {
             });
         };
     }, []);
-    return (_jsx(_Fragment, { children: isActivate ? (route.children && route.children.length ? (_jsx(Switch, { children: getRoutes(route.children, abpath) }, void 0)) : (route.component)) : null }, void 0));
+    return (_jsx(_Fragment, { children: isActivate ? (((_c = route.children) === null || _c === void 0 ? void 0 : _c.length) ? (_jsx(Switch, { children: getRoutes(route.children, abpath) }, void 0)) : (route.component)) : null }, void 0));
 }
 export function Link2(props) {
     const isStr = typeof props.to === "string";
@@ -106,7 +123,9 @@ export function Link2(props) {
         : path.resolve(useRouteMatch().path, _path);
     return (_jsx(Link, Object.assign({}, props, { to: isStr ? abpath : Object.assign(Object.assign({}, props.to), { pathname: abpath }) }), void 0));
 }
-export function Routing({ routes, root = "/", }) {
+export function Routing({ routes, root }) {
+    const match = useRouteMatch();
+    root !== null && root !== void 0 ? root : (root = match.path);
     const history = useHistory();
     const location = useLocation();
     useEffect(() => {
