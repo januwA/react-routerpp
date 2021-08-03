@@ -63,6 +63,9 @@ export interface IRoute {
   CanActivateChild?: Guard[];
 
   /**
+   *
+   * ! 未实现 在react中使用 Promat 组件
+   *
    * 处理程序，以确定是否允许当前用户停用组件
    *
    * 默认情况下，任何用户都可以激活停用
@@ -255,15 +258,7 @@ function CanActivateRoute({
         }
       });
     }
-    return () => {
-      runGuards(route.canDeactivate).then((activate) => {
-        if (typeof activate === "string") {
-          return info.history.replace(activate);
-        }
-
-        if (activate === false) info.history.goBack();
-      });
-    };
+    return () => {};
   }, []);
 
   const Comp = route.component!;

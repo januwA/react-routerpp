@@ -1,3 +1,7 @@
+## 0.4.0 [2021-8-3]
+
+- Mark canDeactivate as unimplemented
+
 ## 0.3.0 [2021-7-27]
 
 - No longer use static components

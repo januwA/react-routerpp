@@ -101,15 +101,7 @@ function CanActivateRoute({ abpath, route, info, }) {
                 }
             });
         }
-        return () => {
-            runGuards(route.canDeactivate).then((activate) => {
-                if (typeof activate === "string") {
-                    return info.history.replace(activate);
-                }
-                if (activate === false)
-                    info.history.goBack();
-            });
-        };
+        return () => { };
     }, []);
     const Comp = route.component;
     return (_jsx(_Fragment, { children: isActivate ? (((_c = route.children) === null || _c === void 0 ? void 0 : _c.length) ? (_jsx(Switch, { children: getRoutes(route.children, abpath) }, void 0)) : Comp ? (_jsx(Comp, {}, void 0)) : null) : null }, void 0));
